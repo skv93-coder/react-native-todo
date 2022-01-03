@@ -11,8 +11,10 @@ import {
   Keyboard,
   Text,
 } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
 
 import DisableKeyboard from "./component/DisableKeyboard";
+import Mycheckbox from "./component/Mycheckbox";
 
 export default function App() {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -47,10 +49,12 @@ export default function App() {
       >
         <View
           style={{
-            paddingTop: 24,
+            paddingBottom: 24,
             marginHorizontal: 32,
             flexDirection: "row",
             justifyContent: "center",
+            position: "absolute",
+            bottom: 0,
             // backgroundColor:'red'
           }}
         >
@@ -77,34 +81,22 @@ export default function App() {
               style={{
                 justifyContent: "center",
                 alignItems: "center",
-                // backgroundColor: "#19920b",
-                // marginLeft: 12,
-
                 paddingLeft: 8,
-                // aspectRatio: 1.2,
-                // transform: [{ rotate: "45deg" }],
-                // borderRadius: Math.round((height * 0.07 + height * 0.07) / 2),
               }}
               onPress={() => {
                 console.log(`9`, 9);
               }}
             >
-              <Image
-                style={{
-                  width: height * 0.07,
-                  height: height * 0.07,
-                }}
-                source={require("./assets/plus.png")}
-              />
+              <AntDesign color="#00adc1" name="pluscircle" size={40} />
             </TouchableOpacity>
           )}
         </View>
         <View
           style={{
             backgroundColor: "#00adc1",
-            width: 0.75 * width,
-            marginLeft: 0.125 * width,
-            marginRight: 0.25 * width,
+            width: 0.9 * width,
+            marginLeft: 0.05 * width,
+            marginRight: 0.05 * width,
             marginTop: 48,
             paddingVertical: 8,
             paddingHorizontal: 16,
@@ -123,9 +115,9 @@ export default function App() {
         <View
           style={{
             backgroundColor: "#f2f2f2",
-            width: 0.75 * width,
-            marginLeft: 0.125 * width,
-            marginRight: 0.25 * width,
+            width: 0.9 * width,
+            marginLeft: 0.05 * width,
+            marginRight: 0.05 * width,
             marginVertical: 16,
             paddingVertical: 8,
             paddingHorizontal: 16,
@@ -138,18 +130,7 @@ export default function App() {
           </View>
 
           <View style={{ flexDirection: "row" }}>
-            <TouchableOpacity style={{ marginRight: 8 }}>
-              <Image
-                style={{ height: 20, width: 20 }}
-                source={require("./assets/delete.png")}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Image
-                style={{ height: 20, width: 20 }}
-                source={require("./assets/eye.png")}
-              />
-            </TouchableOpacity>
+            <Mycheckbox />
           </View>
         </View>
       </SafeAreaView>
