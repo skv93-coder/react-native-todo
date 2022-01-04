@@ -1,14 +1,11 @@
-import React, { useState } from "react";
-import { Pressable, View } from "react-native";
+import React from "react";
+import { Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function Mycheckbox() {
-  const [checked, setChecked] = useState(false);
+export default function Mycheckbox({ checked, setChecked }) {
   return (
     <Pressable
-      onPress={() => {
-        setChecked((prev) => !prev);
-      }}
+      onPress={setChecked.bind(null, !checked)}
       style={{
         width: 28,
         height: 28,

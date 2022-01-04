@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  Image,
   Platform,
   SafeAreaView,
   TextInput,
@@ -10,6 +9,7 @@ import {
   Dimensions,
   Keyboard,
   Text,
+  FlatList,
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 
@@ -17,21 +17,84 @@ import DisableKeyboard from "./component/DisableKeyboard";
 import Mycheckbox from "./component/Mycheckbox";
 
 export default function App() {
-  const [selectedImage, setSelectedImage] = useState(null);
-  console.log(`object`, StatusBar.currentHeight);
+  const [isInputActive, setIsInputActive] = useState(false);
+  const [newTask, setNewTask] = useState("");
+  const [tasks, setTasks] = useState({ list: [], count: 0 });
+  const [startIndex, setStartIndex] = useState(0);
   const { width, height } = Dimensions.get("window");
   const handleKeyboardShow = () => {
-    setSelectedImage((prev) => !prev);
+    setIsInputActive((prev) => !prev);
+  };
+
+  const createTask = async (name) => {
+    // Default options are marked with *
+    Keyboard.dismiss();
+    console.log(`name`, name);
+    if (name.trim()) {
+      setNewTask("");
+      const body = await JSON.stringify({ name });
+      console.log(`body`, body);
+      const response = await fetch(`http://192.168.43.189:3000`, {
+        method: "POST", // *GET, POST, PUT, DELETE, etc.
+        mode: "cors", // no-cors, *cors, same-origin
+        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "same-origin", // include, *same-origin, omit
+        headers: {
+          "Content-Type": "application/json",
+          // 'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        redirect: "follow", // manual, *follow, error
+        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body, // body data type must match "Content-Type" header
+      }).catch(() => {});
+      return response.json(); // parses JSON response into native JavaScript objects  }
+    }
+  };
+  const updateTask = async (status, id) => {
+    const response = await fetch(`http://192.168.43.189:3000/${id}`, {
+      method: "PUT", // *GET, POST, PUT, DELETE, etc.
+      mode: "cors", // no-cors, *cors, same-origin
+      cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: "same-origin", // include, *same-origin, omit
+      headers: {
+        "Content-Type": "application/json",
+        // 'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      redirect: "follow", // manual, *follow, error
+      referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+      body: JSON.stringify({ status }), // body data type must match "Content-Type" header
+    })
+      .then(() => {
+        setTasks((prev) => ({
+          ...prev,
+          list: prev?.list?.map((d) => (d?._id === id ? { ...d, status } : d)),
+        }));
+      })
+      .catch(() => {});
+  };
+  const getTasks = (index = 0) => {
+    console.log(`index`, index);
+    if (index == 0 || index < tasks?.count) {
+      setStartIndex(index);
+
+      fetch(`http://192.168.43.189:3000?skip=${index}`)
+        .then((res) => res.json())
+        .then((res) => {
+          setTasks((prev) => ({ ...res, list: [...prev?.list, ...res?.list] }));
+          console.log(`res`, JSON.stringify(res));
+        });
+    }
   };
   useEffect(() => {
+    getTasks();
     const showSubscription = Keyboard.addListener(
       "keyboardDidShow",
       handleKeyboardShow
     );
-    const hideSubscription = Keyboard.addListener(
-      "keyboardDidHide",
-      handleKeyboardShow
-    );
+    const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
+      handleKeyboardShow();
+      // createTask(newTask);
+    });
 
     return () => {
       showSubscription.remove();
@@ -53,18 +116,19 @@ export default function App() {
             marginHorizontal: 32,
             flexDirection: "row",
             justifyContent: "center",
-            position: "absolute",
-            bottom: 0,
+            // position: "absolute",
+            // bottom: 0,
             // backgroundColor:'red'
           }}
         >
           <TextInput
             placeholder="Enter a task"
+            value={newTask}
+            onChangeText={(val) => setNewTask(val)}
             style={{
               backgroundColor: "#F4FAFB",
-              width: selectedImage ? width * 0.8 : width * 0.9,
+              width: isInputActive ? width * 0.8 : width * 0.9,
               height: height * 0.07,
-              // padding: "4 8",
               paddingTop: 4,
               paddingBottom: 4,
               paddingHorizontal: 8,
@@ -73,10 +137,11 @@ export default function App() {
               borderWidth: 2,
             }}
             onSubmitEditing={(ev) => {
-              console.log(`ev`);
+              console.log(`ev`, ev);
+              createTask(newTask);
             }}
           />
-          {selectedImage && (
+          {isInputActive && (
             <TouchableOpacity
               style={{
                 justifyContent: "center",
@@ -84,7 +149,8 @@ export default function App() {
                 paddingLeft: 8,
               }}
               onPress={() => {
-                console.log(`9`, 9);
+                console.log(`ev`, newTask);
+                createTask(newTask);
               }}
             >
               <AntDesign color="#00adc1" name="pluscircle" size={40} />
@@ -112,27 +178,42 @@ export default function App() {
             <Text style={{ color: "white", fontSize: 16 }}>15 Tasks left</Text>
           </View>
         </View>
-        <View
-          style={{
-            backgroundColor: "#f2f2f2",
-            width: 0.9 * width,
-            marginLeft: 0.05 * width,
-            marginRight: 0.05 * width,
-            marginVertical: 16,
-            paddingVertical: 8,
-            paddingHorizontal: 16,
-            flexDirection: "row",
-            justifyContent: "space-between",
-          }}
-        >
-          <View>
-            <Text style={{}}>This is the task and want to talk...</Text>
-          </View>
+        <FlatList
+          keyExtractor={(item) => item?._id}
+          data={tasks.list}
+          onEndReachedThreshold={0.1}
+          onEndReached={getTasks.bind(null, startIndex + 10)}
+          renderItem={(data) => (
+            <View
+              style={{
+                backgroundColor: "#f2f2f2",
+                width: 0.9 * width,
+                marginLeft: 0.05 * width,
+                marginRight: 0.05 * width,
+                marginVertical: 16,
+                paddingVertical: 8,
+                paddingHorizontal: 16,
+                flexDirection: "row",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <Text style={{}} ellipsizeMode="tail" numberOfLines={1}>
+                  {data?.item?.name?.length > 40
+                    ? data?.item?.name.substring(0, 37) + "..."
+                    : data?.item?.name}
+                </Text>
+              </View>
 
-          <View style={{ flexDirection: "row" }}>
-            <Mycheckbox />
-          </View>
-        </View>
+              <View style={{ flexDirection: "row" }}>
+                <Mycheckbox
+                  checked={!!data?.item?.status}
+                  setChecked={() => {}}
+                />
+              </View>
+            </View>
+          )}
+        />
       </SafeAreaView>
     </DisableKeyboard>
   );
