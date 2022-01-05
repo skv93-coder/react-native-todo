@@ -47,10 +47,16 @@ export default function App() {
         referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
         body, // body data type must match "Content-Type" header
       }).catch(() => {});
-      return response.json(); // parses JSON response into native JavaScript objects  }
+      const { todo } = await response.json();
+      console.log(`response`, todo);
+      setTasks((prev) => ({
+        count: Number(prev.count) + 1,
+        list: [...prev.list, todo],
+      }));
     }
   };
   const updateTask = async (status, id) => {
+    console.log(`status, id`, status, id);
     const response = await fetch(`http://192.168.43.189:3000/${id}`, {
       method: "PUT", // *GET, POST, PUT, DELETE, etc.
       mode: "cors", // no-cors, *cors, same-origin
@@ -80,7 +86,7 @@ export default function App() {
       fetch(`http://192.168.43.189:3000?skip=${index}`)
         .then((res) => res.json())
         .then((res) => {
-          setTasks((prev) => ({ ...res, list: [...prev?.list, ...res?.list] }));
+          setTasks((prev) => ({ ...res, list: [...prev.list, ...res.list] }));
           console.log(`res`, JSON.stringify(res));
         });
     }
@@ -207,8 +213,12 @@ export default function App() {
 
               <View style={{ flexDirection: "row" }}>
                 <Mycheckbox
-                  checked={!!data?.item?.status}
-                  setChecked={() => {}}
+                  checked={data?.item?.status !== "pending"}
+                  setChecked={updateTask.bind(
+                    null,
+                    data?.item?.status === "pending" ? "done" : "pending",
+                    data?.item?._id
+                  )}
                 />
               </View>
             </View>
