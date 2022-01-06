@@ -10,6 +10,7 @@ import {
   Keyboard,
   Text,
   FlatList,
+  Modal,
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 
@@ -93,17 +94,17 @@ export default function App() {
   };
   useEffect(() => {
     getTasks();
-    const showSubscription = Keyboard.addListener(
-      "keyboardDidShow",
-      handleKeyboardShow
-    );
+    // const showSubscription = Keyboard.addListener(
+    //   "keyboardDidShow",
+    //   handleKeyboardShow
+    // );
     const hideSubscription = Keyboard.addListener("keyboardDidHide", () => {
       handleKeyboardShow();
       // createTask(newTask);
     });
 
     return () => {
-      showSubscription.remove();
+      // showSubscription.remove();
       hideSubscription.remove();
     };
   }, []);
@@ -116,53 +117,6 @@ export default function App() {
           paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
         }}
       >
-        <View
-          style={{
-            paddingBottom: 24,
-            marginHorizontal: 32,
-            flexDirection: "row",
-            justifyContent: "center",
-            // position: "absolute",
-            // bottom: 0,
-            // backgroundColor:'red'
-          }}
-        >
-          <TextInput
-            placeholder="Enter a task"
-            value={newTask}
-            onChangeText={(val) => setNewTask(val)}
-            style={{
-              backgroundColor: "#F4FAFB",
-              width: isInputActive ? width * 0.8 : width * 0.9,
-              height: height * 0.07,
-              paddingTop: 4,
-              paddingBottom: 4,
-              paddingHorizontal: 8,
-              margin: "auto",
-              borderBottomColor: "#088000",
-              borderWidth: 2,
-            }}
-            onSubmitEditing={(ev) => {
-              console.log(`ev`, ev);
-              createTask(newTask);
-            }}
-          />
-          {isInputActive && (
-            <TouchableOpacity
-              style={{
-                justifyContent: "center",
-                alignItems: "center",
-                paddingLeft: 8,
-              }}
-              onPress={() => {
-                console.log(`ev`, newTask);
-                createTask(newTask);
-              }}
-            >
-              <AntDesign color="#00adc1" name="pluscircle" size={40} />
-            </TouchableOpacity>
-          )}
-        </View>
         <View
           style={{
             backgroundColor: "#00adc1",
@@ -224,6 +178,79 @@ export default function App() {
             </View>
           )}
         />
+        {isInputActive ? (
+          <Modal>
+            <View
+              style={{
+                paddingBottom: 24,
+                marginHorizontal: 32,
+                flexDirection: "row",
+                justifyContent: "center",
+                // position: "absolute",
+                // bottom: 0,
+                // backgroundColor:'red'
+              }}
+            >
+              <TextInput
+                placeholder="Enter a task"
+                value={newTask}
+                onChangeText={(val) => setNewTask(val)}
+                style={{
+                  backgroundColor: "#F4FAFB",
+                  width: isInputActive ? width * 0.8 : width * 0.9,
+                  height: height * 0.07,
+                  paddingTop: 4,
+                  paddingBottom: 4,
+                  paddingHorizontal: 8,
+                  margin: "auto",
+                  borderBottomColor: "#088000",
+                  borderWidth: 2,
+                }}
+                onSubmitEditing={(ev) => {
+                  console.log(`ev`, ev);
+                  createTask(newTask);
+                }}
+              />
+
+              <TouchableOpacity
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  paddingLeft: 8,
+                }}
+                onPress={() => {
+                  console.log(`ev`, newTask);
+                  createTask(newTask);
+                }}
+              >
+                <AntDesign color="#00adc1" name="pluscircle" size={40} />
+              </TouchableOpacity>
+            </View>
+          </Modal>
+        ) : (
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              marginBottom: 6,
+              marginRight: 16,
+              position: "absolute",
+              bottom: 0,
+              right: 0,
+              height: 60,
+              width: 60,
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => {
+                handleKeyboardShow();
+              }}
+            >
+              <AntDesign color="#00adc1" name="pluscircle" size={40} />
+            </TouchableOpacity>
+          </View>
+        )}
       </SafeAreaView>
     </DisableKeyboard>
   );
